@@ -119,7 +119,6 @@ function getProductCurrency(productPrice) {
 }
 // product properties
 const productProperties = document.querySelectorAll('.properties li');
-
 function getProductProperties(productProperties) {
     let propertiesResult = {}
 
@@ -134,6 +133,21 @@ function getProductProperties(productProperties) {
     return propertiesResult;
 };
 
+// product description
+const productDescription = document.querySelector('.description');
+
+function getProductDescription(productDescription) {
+    const clone = productDescription.cloneNode(true);
+    let result;
+
+    clone.querySelectorAll('*').forEach(el => {
+        [...el.attributes].forEach(attr => {
+            el.removeAttribute(attr.name);
+        });
+    });
+
+    return result = clone.innerHTML;
+}
 
 function parsePage() {
 
@@ -157,6 +171,7 @@ function parsePage() {
             discountPercent: getProductDiscountPercent(productOldPrice, currentPrice),
             currency: getProductCurrency(productPrice),
             properties: getProductProperties(productProperties),
+            description: getProductDescription(productDescription),
         },
         suggested: [],
         reviews: []
