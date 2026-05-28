@@ -136,17 +136,43 @@ function getProductProperties(productProperties) {
 // product description
 const productDescription = document.querySelector('.description');
 
-function getProductDescription(productDescription) {
-    const clone = productDescription.cloneNode(true);
-    let result;
-
+function getProductDescription(node) {
+    const clone = node.cloneNode(true);
+    // удаляем все аттрибуты клонированной ноды
     clone.querySelectorAll('*').forEach(el => {
         [...el.attributes].forEach(attr => {
             el.removeAttribute(attr.name);
         });
     });
 
-    return result = clone.innerHTML;
+    return clone.innerHTML;
+}
+
+// suggested products
+const productCards = document.querySelectorAll('.suggested .items article');
+
+function getSuggestedProducts(cards) {
+    let suggestedResult = [];
+
+    cards.forEach(card => {
+        const title = card.querySelector('h3').textContent;
+        const description = card.querySelector('p').textContent;
+        const image = card.querySelector('img').src;
+
+        const price = card.querySelector('b').textContent;
+        const priceText = price.replace(price[0], '').trim();
+        const priceCurrency = card.querySelector('b');
+
+        suggestedResult.push({
+            name: title,
+            description,
+            image,
+            price: priceText,
+            currency: getProductCurrency(priceCurrency),
+        });
+    });
+
+    return suggestedResult;
 }
 
 function parsePage() {
@@ -173,7 +199,7 @@ function parsePage() {
             properties: getProductProperties(productProperties),
             description: getProductDescription(productDescription),
         },
-        suggested: [],
+        suggested: getSuggestedProducts(productCards),
         reviews: []
     };
 }
