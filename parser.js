@@ -13,7 +13,7 @@ function getOgData(tags) {
 
     tags.forEach(tag => {
         const key = tag.getAttribute('property').replace('og:', '');
-        ogData[key] = tag.content;
+        ogData[key] = tag.content.split('—')[0].trim()
     });
 
     return ogData;
@@ -26,11 +26,10 @@ const mainProductImage = document.querySelector('figure img');
 const productImageThumbnails = document.querySelectorAll('nav button img')
 const images = [];
 
-//главное изображение пушим в массив первым
 images.push({
-    preview: mainProductImage.src,
+    preview: productImageThumbnails[0].src,
     full: productImageThumbnails[0].dataset.src,
-    alt: mainProductImage.alt,
+    alt: productImageThumbnails[0].alt,
 })
 
 productImageThumbnails.forEach((item, index) => {
@@ -63,16 +62,16 @@ tags.forEach(tag => {
 
 // product prices
 const productPrice = document.querySelector('.price');
-const currentPrice = productPrice
+const currentPrice = Number(productPrice
                                 .childNodes[0]
                                 .textContent
                                 .replace('₽', '')
-                                .trim();
-const productOldPrice = document.
+                                .trim());
+const productOldPrice = Number(document.
                                 querySelector('.price span')
                                 .textContent
                                 .replace('₽', '')
-                                .trim();
+                                .trim());
 
 // product discount
 function getProductDiscountPercent(oldPrice, currentPrice) {
@@ -83,7 +82,7 @@ function getProductDiscountPercent(oldPrice, currentPrice) {
     } else if (oldPrice < currentPrice) {
         discountPercent = 'Ошибка: первоначальная цена меньше цены с учетом скидки'
     } else {
-        discountPercent = String(100 - ((currentPrice*100)/oldPrice)) + '%';
+        discountPercent = String((100 - ((currentPrice * 100) / oldPrice)).toFixed(2)) + '%';
     }
 
     return discountPercent;
@@ -145,7 +144,7 @@ function getProductDescription(node) {
         });
     });
 
-    return clone.innerHTML;
+    return clone.innerHTML.trim();
 }
 
 // suggested products
@@ -175,6 +174,41 @@ function getSuggestedProducts(cards) {
     return suggestedResult;
 }
 
+// reviews
+const reviews = document.querySelectorAll('.reviews .items article');
+let reviewsResult = [];
+
+reviews.forEach(review => {
+    const title = review.querySelector('h3').textContent;
+    const description = review.querySelector('p').textContent;
+
+    const ratings = review.querySelectorAll('.rating span');
+    let ratingCounter = 0;
+    ratings.forEach(rating => {
+        if (rating.classList.contains('filled')) {
+            ratingCounter += 1;
+        }
+    });
+
+    const date = review.querySelector('.author i').textContent;
+    const dateModified = date.replaceAll('/', '.');
+
+    const authorAvatar = review.querySelector('.author img').src;
+    const authorName = review.querySelector('.author span').textContent;
+    const authorData = {
+        avatar: authorAvatar,
+        name: authorName,
+    }
+
+    reviewsResult.push({
+        title,
+        description,
+        rating: ratingCounter,
+        date: dateModified,
+        author: authorData,
+    });    
+});
+
 function parsePage() {
 
     return {
@@ -200,7 +234,7 @@ function parsePage() {
             description: getProductDescription(productDescription),
         },
         suggested: getSuggestedProducts(productCards),
-        reviews: []
+        reviews: reviewsResult,
     };
 }
 
